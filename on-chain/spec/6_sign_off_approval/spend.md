@@ -6,9 +6,10 @@
 
 ## Datum
 
-- `project_url`: `String` - Project Details
 - `fund_requested`: `Int` - fund requested
 - `recevier_address`: `Address`
+- `member`: `Int` - Member token assetName
+- `metadata`: `Data` - Project Details
 
 ## User Action
 

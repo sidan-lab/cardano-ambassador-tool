@@ -1,10 +1,9 @@
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Transaction}
 use cocktail.{
-  inputs_with, output_inline_datum, outputs_at_with, outputs_at_with_policy,
-  value_length,
+  inputs_with, only_minted_token, output_inline_datum, outputs_at_with,
+  outputs_at_with_policy, policy_only_minted_token, value_length,
 }
-use cocktail/vodka_mints.{only_minted_token, policy_only_minted_token}
 use types.{
   ApplyMembership, ApproveMember, MembershipIntentDatum,
   MembershipIntentMintRedeemer, OracleDatum, RejectMember,
@@ -39,7 +38,7 @@ validator membership_intent(oracle_nft: PolicyId) {
     } = oracle_input_datum
 
     when redeemer is {
-      ApplyMembership(user_token_policy_id, asset_name) -> {
+      ApplyMembership(user_token_policy_id, asset_name, metadata) -> {
         expect [intent_output] =
           outputs_at_with_policy(outputs, memebership_intent_address, policy_id)
         let is_intent_output_value_clean =
@@ -47,7 +46,10 @@ validator membership_intent(oracle_nft: PolicyId) {
         expect intent_output_datum: MembershipIntentDatum =
           output_inline_datum(intent_output)
         let correct_intent_output_datum =
-          MembershipIntentDatum { token: (user_token_policy_id, asset_name) }
+          MembershipIntentDatum {
+            token: (user_token_policy_id, asset_name),
+            metadata,
+          }
         let is_intent_datum_correct =
           intent_output_datum == correct_intent_output_datum
 
@@ -66,7 +68,6 @@ validator membership_intent(oracle_nft: PolicyId) {
           mint,
           policy_id,
           "",
-          //todo: naming
           1,
         )?
       }

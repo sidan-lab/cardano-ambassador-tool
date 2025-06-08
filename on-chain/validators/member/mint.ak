@@ -1,10 +1,9 @@
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Transaction}
 use cocktail.{
-  inputs_at_with, inputs_at_with_policy, output_inline_datum, outputs_at_with,
-  policy_only_minted_token, value_length, value_policy_info,
+  inputs_at_with, inputs_at_with_policy, only_minted_token, output_inline_datum,
+  outputs_at_with, policy_only_minted_token, value_length, value_policy_info,
 }
-use cocktail/vodka_mints.{only_minted_token}
 use types.{
   AddMember, MemberDatum, MemberMintRedeemer, MembershipIntentDatum, OracleDatum,
   RemoveMember,
@@ -64,6 +63,7 @@ validator member(oracle_nft: PolicyId) {
             token: intent_input_datum.token,
             completion: [],
             fund_recevied: 0,
+            metadata: intent_input_datum.metadata,
           }
         let is_member_output_datum_correct =
           member_output_datum == new_member_output_datum

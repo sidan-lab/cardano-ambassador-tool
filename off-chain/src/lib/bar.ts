@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import blueprint from "../../../../on-chain/plutus.json";
+import blueprint from "../../../on-chain/plutus.json";
 
 import {
   OutputReference,
-  List,
   ConStr0,
   ConStr1,
   MintingBlueprint,
@@ -14,13 +12,15 @@ import {
   Tuple,
   AssetName,
   Pairs,
+  ByteString,
   PubKeyAddress,
   ScriptAddress,
   ScriptHash,
   WithdrawalBlueprint,
-  ByteString,
-  VerificationKey,
+  List,
+  PubKeyHash,
 } from "@meshsdk/core";
+import { ProposalMetadata } from "./types";
 
 const version = "V3";
 const networkId = 0; // 0 for testnet; 1 for mainnet
@@ -285,39 +285,36 @@ export type AddMember = ConStr0<[]>;
 
 export type RemoveMember = ConStr1<[]>;
 
-export type MemberSpendRedeemer =
-  | AdminRemoveMember
-  | MemberProposeProject
-  | AdminSignOffProject;
+export type MemberSpendRedeemer = AdminRemoveMember | AdminSignOffProject;
 
 export type AdminRemoveMember = ConStr0<[]>;
 
-export type MemberProposeProject = ConStr1<[]>;
-
-export type AdminSignOffProject = ConStr2<[]>;
+export type AdminSignOffProject = ConStr1<[]>;
 
 export type MemberDatum = ConStr0<
-  [Tuple<PolicyId, AssetName>, Pairs<ByteString, Integer>, Integer]
+  [Tuple<[PolicyId, AssetName]>, Pairs<ProposalMetadata, Integer>, Integer, any]
 >;
+
+export type Data = any;
 
 export type MembershipIntentMintRedeemer =
   | ApplyMembership
   | ApproveMember
   | RejectMember;
 
-export type ApplyMembership = ConStr0<[PolicyId, AssetName]>;
+export type ApplyMembership = ConStr0<[PolicyId, AssetName, any]>;
 
 export type ApproveMember = ConStr1<[]>;
 
 export type RejectMember = ConStr2<[]>;
 
-export type Data = any;
-
-export type MembershipIntentDatum = ConStr0<[Tuple<PolicyId, AssetName>]>;
+export type MembershipIntentDatum = ConStr0<
+  [Tuple<[PolicyId, AssetName]>, any]
+>;
 
 export type OracleSpendRedeemer = RotateAdmin | UpdateThreshold | StopOracle;
 
-export type RotateAdmin = ConStr0<[List<VerificationKey>, ByteString]>;
+export type RotateAdmin = ConStr0<[List<PubKeyHash>, ByteString]>;
 
 export type UpdateThreshold = ConStr1<[Integer]>;
 
@@ -325,7 +322,7 @@ export type StopOracle = ConStr2<[]>;
 
 export type OracleDatum = ConStr0<
   [
-    List<VerificationKey>,
+    List<PubKeyHash>,
     ByteString,
     Integer,
     PolicyId,
@@ -354,7 +351,7 @@ export type MintProposal = ConStr0<[]>;
 export type ApproveSignOff = ConStr1<[]>;
 
 export type ProposalDatum = ConStr0<
-  [ByteString, Integer, PubKeyAddress | ScriptAddress]
+  [Integer, PubKeyAddress | ScriptAddress, Integer, any]
 >;
 
 export type ProposeIntentMintRedeemer =
@@ -363,7 +360,7 @@ export type ProposeIntentMintRedeemer =
   | RejectProposal;
 
 export type ProposeProject = ConStr0<
-  [ByteString, Integer, PubKeyAddress | ScriptAddress]
+  [Integer, PubKeyAddress | ScriptAddress, Integer, any]
 >;
 
 export type ApproveProposal = ConStr1<[]>;

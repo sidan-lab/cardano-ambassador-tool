@@ -1,10 +1,12 @@
+use aiken/cbor
+use aiken/crypto.{blake2b_256}
 use cardano/assets.{PolicyId}
 use cardano/transaction.{Transaction}
 use cocktail.{
-  inputs_at_with_policy, inputs_with, output_inline_datum, outputs_at_with,
-  outputs_at_with_policy, value_length,
+  inputs_at_with_policy, inputs_with, only_minted_token, output_inline_datum,
+  outputs_at_with, outputs_at_with_policy, policy_only_minted_token,
+  value_length, value_policy_info,
 }
-use cocktail/vodka_mints.{only_minted_token, policy_only_minted_token}
 use types.{
   ApproveProposal, MemberDatum, OracleDatum, ProposalDatum,
   ProposeIntentMintRedeemer, ProposeProject, RejectProposal,
@@ -39,19 +41,13 @@ validator propose_intent(oracle_nft: PolicyId) {
     } = oracle_input_datum
 
     when redeemer is {
-      ProposeProject(project_url, fund_requested, receiver) -> {
-        expect [member_input] =
-          inputs_at_with_policy(inputs, member_address, member_token)
+      ProposeProject(fund_requested, receiver, member, metadata) -> {
+        expect [member_ref_input] =
+          inputs_at_with_policy(reference_inputs, member_address, member_token)
         expect member_input_datum: MemberDatum =
-          output_inline_datum(member_input.output)
+          output_inline_datum(member_ref_input.output)
         let MemberDatum { token, .. } = member_input_datum
 
-        expect [member_output] =
-          outputs_at_with_policy(outputs, member_address, member_token)
-        let is_member_output_value_clean =
-          value_length(member_output.value) == 2
-
-        //todo: check member datum
         expect [token_input] = inputs_with(inputs, token.1st, token.2nd)
         let token_owner = token_input.output.address
         expect [_] = outputs_at_with(outputs, token_owner, token.1st, token.2nd)
@@ -63,30 +59,40 @@ validator propose_intent(oracle_nft: PolicyId) {
         expect intent_output_datum: ProposalDatum =
           output_inline_datum(intent_output)
         let correct_intent_output_datum =
-          ProposalDatum { project_url, fund_requested, receiver }
+          ProposalDatum { fund_requested, receiver, member, metadata }
         let is_intent_datum_correct =
           intent_output_datum == correct_intent_output_datum
 
-        is_member_output_value_clean? && is_intent_output_value_clean? && is_intent_datum_correct? && only_minted_token(
+        let propose_intent_asset_name =
+          cbor.serialise(metadata) |> blake2b_256()
+        is_intent_output_value_clean? && is_intent_datum_correct? && only_minted_token(
           mint,
           policy_id,
-          "",
-          //todo: naming
+          propose_intent_asset_name,
           1,
         )?
       }
 
-      ApproveProposal ->
-        policy_only_minted_token(mint, policy_id, "", -1)? && policy_only_minted_token(
+      ApproveProposal -> {
+        expect [propose_intent_input] =
+          inputs_at_with_policy(inputs, propose_intent_address, policy_id)
+        expect Some((_, asset_name, _)) =
+          value_policy_info(propose_intent_input.output.value, policy_id)
+        policy_only_minted_token(mint, policy_id, asset_name, -1)? && policy_only_minted_token(
           mint,
           proposal_token,
-          "",
+          asset_name,
           1,
         )?
+      }
       RejectProposal -> {
+        expect [propose_intent_input] =
+          inputs_at_with_policy(inputs, propose_intent_address, policy_id)
+        expect Some((_, asset_name, _)) =
+          value_policy_info(propose_intent_input.output.value, policy_id)
         let is_admins_multi_signed =
           has_enough_signers(admins, multi_sig_threshold, extra_signatories)
-        only_minted_token(mint, policy_id, "", -1)? && is_admins_multi_signed?
+        only_minted_token(mint, policy_id, asset_name, -1)? && is_admins_multi_signed?
       }
     }
   }

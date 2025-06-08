@@ -10,7 +10,7 @@ pub const mock_third_admin = mock_pub_key_hash(2)
 
 pub const mock_admins = [mock_first_admin, mock_second_admin, mock_third_admin]
 
-pub const mock_admin_tenure = @"11-11-1111"
+pub const mock_admin_tenure = "11-11-1111"
 
 pub const mock_multisig_threshold = 2
 
@@ -82,7 +82,7 @@ pub const mock_new_admins =
 
 pub const mock_new_multisig_threshold = 1
 
-pub const mock_new_admin_tenure = @"22-22-2222"
+pub const mock_new_admin_tenure = "22-22-2222"
 
 pub const mock_counter_input_datum = CounterDatum { count: 2 }
 
@@ -92,9 +92,11 @@ pub const mock_user_token = (mock_policy_id(20), "user_token")
 
 pub const mock_user_address = from_script("user_address")
 
-pub const mock_project_url = @"abc project"
+pub const mock_metadata = "abc project"
 
 pub const mock_fund_requested = 1000
+
+pub const mock_member = 2
 
 pub const mock_receiver = from_script("receiver")
 
@@ -103,11 +105,13 @@ pub const mock_member_datum =
     token: (mock_user_token.1st, mock_user_token.2nd),
     completion: [],
     fund_recevied: 0,
+    metadata: mock_metadata,
   }
 
 pub const mock_proposal_datum =
   ProposalDatum {
-    project_url: mock_project_url,
     fund_requested: mock_fund_requested,
     receiver: mock_receiver,
+    member: mock_member,
+    metadata: mock_metadata,
   }
