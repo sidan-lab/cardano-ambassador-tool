@@ -6,4 +6,4 @@ This is a reference implementation of on-chain ambassador tool. In this reposito
 
 2. `off-chain` - The SDK wrapped all the necessary function for easy implementation
 
-3. `client` - UI
+3. `client` - UI of the tool
