@@ -7,11 +7,11 @@ import {
   IWallet,
   IFetcher,
   ISubmitter,
+  IEvaluator,
 } from "@meshsdk/core";
 import { CATConstants } from "./constant";
-import { OfflineEvaluator } from "@meshsdk/core-csl";
 
-export type IProvider = IFetcher & ISubmitter;
+export type IProvider = IEvaluator & IFetcher & ISubmitter;
 export type Network = "preprod" | "mainnet";
 
 export class Layer1Tx {
@@ -49,10 +49,7 @@ export class Layer1Tx {
       verbose: false,
     };
     if (evaluateTx) {
-      const evaluator = new OfflineEvaluator(
-        this.provider,
-        this.catConstant.network
-      );
+      const evaluator = this.provider
       txBuilderConfig.evaluator = evaluator;
     }
 
